@@ -136,5 +136,5 @@ def user_translations_stream():
                 user_translation[column_names['source_language']],
                 user_translation[column_names['status']]
             )
-            time.sleep(1)
+            # time.sleep(1)
 
