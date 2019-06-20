@@ -1,0 +1,15 @@
+itsdangerous==0.24
+numpy==1.16.0
+requests==2.18.4
+
+Flask==1.0.2
+Flask-Babel==0.12.2
+Flask-socketio==3.3.2
+
+gunicorn[gevent]==19.9.0
+
+pycrypto==2.6.1
+
+pyodbc==4.0.26
+
+unbabel-py==0.49

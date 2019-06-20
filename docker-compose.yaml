@@ -1,0 +1,53 @@
+
+# If needed, override the options here with a file: docker-compose.override.yaml
+# For the env variables, they are set using a .env file. If wanting to override, just set them: https://docs.docker.com/compose/environment-variables/#substitute-environment-variables-in-compose-files
+# See: https://docs.docker.com/compose/extends/#understanding-multiple-compose-files
+
+version: "3.5"
+
+services:
+  datastore:
+    image: singularities/datastore-emulator
+    environment:
+      - DATASTORE_PROJECT_ID=${DATASTORE_PROJECT_NAME:-tests}
+      - DATASTORE_LISTEN_ADDRESS=0.0.0.0:${DATASTORE_LISTEN:-58081}
+#    ports:
+#      - "${DATASTORE_HOST:-datastore}:${DATASTORE_LISTEN:-58081}"
+      
+  pubsub:
+    image: singularities/pubsub-emulator
+    environment:
+      - PUBSUB_PROJECT_ID=0.0.0.0:${PUBSUB_PROJECT_ID:-tests}
+      - PUBSUB_LISTEN_ADDRESS=0.0.0.0:${PUBSUB_LISTEN:-58538}
+#    ports:
+#      - "${PUBSUB_HOST:-pubsub}:${PUBSUB_LISTEN:-58538}"
+  
+  docdigitizer.automated.tests:
+    build:
+      context: .
+      target: Test
+    depends_on:
+      - "datastore"
+      - "pubsub"
+    environment:
+      - DATASTORE_EMULATOR_HOST=${DATASTORE_HOST:-datastore}:${DATASTORE_LISTEN:-58081}
+      - PUBSUB_EMULATOR_HOST=${PUBSUB_HOST:-pubsub}:${PUBSUB_LISTEN:-58538}
+      - GOOGLE_CLOUD_PROJECT=${DATASTORE_PROJECT_NAME:-tests}
+    volumes:
+      - .:/app
+    user: ${CURRENT_UID}
+    command: ["pytest", "./test", '-vv']
+
+  docdigitizer.test:
+    build:
+      context: .
+      target: Test
+    depends_on:
+      - "datastore"
+    environment:
+      - DATASTORE_EMULATOR_HOST=datastore:8081
+      - DATASTORE_PROJECT_ID=datastore-dev
+      - GOOGLE_APPLICATION_CREDENTIALS=tests/permissionless_account.json
+    volumes:
+      - .:/app
+

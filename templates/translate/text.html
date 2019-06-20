@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Translation</title>
+</head>
+<body>
+
+    <main>
+        <form method="POST" data-translation-request>
+            <textarea name="source_text" id="source_text" cols="50" rows="20"
+                        placeholder="Type here what you want to translate"></textarea>
+            <p>
+                <select name="sourceLanguage" id="sourceLanguage" title="Only English is available for this demo">
+                    <option value="EN">English</option>
+                </select><span class="red note">(Only english is available for this demo)</span><br>
+                <select name="targetLanguage" id="targetLanguage" title="Only Spanish is available for this demo">
+                    <option value="ES">Spanish</option>
+                </select><span class="red note">(Only spanish is available for this demo)</span>
+            </p>
+            <button type="submit">Request translation</button>
+        </form>
+    </main>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
+    <script src="/static/translate/text.js"></script>
+
+    <!-- Needs to be available before the table because the table can be very long -->
+    <template data-translation-line>
+        <tr data-line-id>
+            <td data-uid></td>
+            <td data-source_language></td>
+            <td data-target_langauge></td>
+            <td data-status></td>
+            <td data-text></td>
+            <td data-translation></td>
+        </tr>
+    </template>
+
+    <table>
+        <tr>
+            <th>Submitted at</th>
+            <th>From</th>
+            <th>to</th>
+            <th>status</th>
+            <th>text</th>
+            <th>translated</th>
+        </tr>
+        <tbody data-translation-results>
+            {% for translation in user_translations %}
+                <tr data-line-id="{{ translation.uid }}">
+                    <td data-uid >{{ translation.uid }}</td>
+                    <td data-source_language >{{ translation.source_language }}</td>
+                    <td data-target_langauge >{{ translation.target_language }}</td>
+                    <td data-status >{{ translation.status }}</td>
+                    <td data-text >{{ translation.text }}</td>
+                    <td data-translation >{{ translation.translation }}</td>
+                </tr>
+            {% endfor %}
+            <!--<tr>
+                <submission-date></submission-date>
+                <from-language></from-language>
+                <to-language></to-language>
+                <translation-status></translation-status>
+                <original-text></original-text>
+                <translated-text></translated-text>
+            </tr>-->
+        </tbody>
+    </table>
+
+</body>
+</html>

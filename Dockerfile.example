@@ -1,0 +1,85 @@
+FROM gcr.io/google-appengine/python AS Build
+LABEL python_version=python3.6
+
+RUN virtualenv --no-download /env -p python3.6
+
+ARG PORT=8080
+
+# Set virtualenv environment variables. This is equivalent to running
+# source /env/bin/activate
+ENV VIRTUAL_ENV /env
+ENV PATH /env/bin:$PATH
+
+WORKDIR /app
+
+ADD . .
+RUN pip install -r requirements-base.txt
+RUN pybabel compile -d translations
+
+
+FROM Build AS Debug
+
+ARG PORT=8090
+
+EXPOSE $PORT
+
+RUN pip install -r requirements-dev.txt
+ENTRYPOINT gunicorn -b :$PORT -w 1 --threads 10 main:app
+
+
+FROM Build AS Test
+
+# install google chrome
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+RUN apt-get -y update
+RUN apt-get install -y google-chrome-stable
+
+# install chromedriver
+RUN apt-get install -yqq unzip
+RUN wget -O /tmp/chromedriver.zip http://chromedriver.storage.googleapis.com/`curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE`/chromedriver_linux64.zip
+RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
+
+# install xserver
+RUN apt-get install -yqq xvfb
+
+#install firefox
+RUN apt-get -y --no-install-recommends install firefox
+RUN rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+RUN wget --no-verbose -O /tmp/firefox.tar.bz2 "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US"
+RUN apt-get -y purge firefox
+RUN rm -rf /opt/firefox
+RUN tar -C /opt -xjf /tmp/firefox.tar.bz2
+RUN rm /tmp/firefox.tar.bz2
+RUN mv /opt/firefox /opt/firefox-latest
+RUN ln -fs /opt/firefox-latest/firefox /usr/bin/firefox
+
+#install gecko
+RUN wget --no-verbose -O /tmp/geckodriver.tar.gz https://github.com/mozilla/geckodriver/releases/download/v0.23.0/geckodriver-v0.23.0-linux64.tar.gz
+RUN rm -rf /opt/geckodriver
+RUN tar -C /opt -zxf /tmp/geckodriver.tar.gz
+RUN rm /tmp/geckodriver.tar.gz
+RUN mv /opt/geckodriver /opt/geckodriver-0.23.0
+RUN chmod 755 /opt/geckodriver-0.23.0
+RUN ln -fs /opt/geckodriver-0.23.0 /usr/bin/geckodriver
+
+
+# set display port and dbus env to avoid hanging
+ENV DISPLAY=:99
+ENV DBUS_SESSION_BUS_ADDRESS=/dev/null
+
+
+EXPOSE $PORT
+RUN pip install -r requirements-test.txt
+CMD python -m pytest test/
+
+FROM Build AS Release
+
+EXPOSE $PORT
+RUN pip install -r requirements.txt
+# Configuration is in the *.yaml file as the GUNICORN_CMD_ARGS
+ENTRYPOINT gunicorn -b :$PORT main:app
+
+
+# The last FROM makes it the default
+FROM Release as default

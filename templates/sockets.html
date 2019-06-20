@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sockets</title>
+    <script src="http://code.jquery.com/jquery-3.3.1.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
+    <script src="/static/js/sockets.js"></script>
+</head>
+<body>
+<form id="emit" action="">
+    <textarea name="emit_data" id="emit_data" cols="30" rows="10"></textarea>
+    <button type="submit">Submit</button>
+</form>
+<br><br>
+<form id="broadcast" action="">
+    <textarea name="broadcast_data" id="broadcast_data" cols="30" rows="10"></textarea>
+    <button type="submit">Submit</button>
+</form>
+<div id="log"></div>
+</body>
+</html>
