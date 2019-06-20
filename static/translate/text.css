@@ -1,0 +1,38 @@
+
+
+body{
+	display:grid;
+  	width: 100%;
+  	height: 100%;
+
+  	gap: 12px;
+
+	grid-template-areas:	"header"
+							"translate"
+							"translations";
+
+}
+
+@media screen and (min-width:1200px) {
+
+	body{
+		grid-template-areas:	"header header"
+								"translate translations";
+
+		grid-template-columns: 500px 1fr;
+  	}
+}
+
+body > header {
+	grid-area: header;
+	text-align: center;
+}
+
+body > main {
+	grid-area: translate;
+	text-align: center;
+}
+
+body > section.translated {
+	grid-area: translations;
+}

@@ -3,74 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <title>Translation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="/static/translate/text.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- <script> files inside <main> to speed up loading of the most important part of the page -->
 </head>
 <body>
     <header>
-        InsertPrettyHeaderHere
+        <img src="" alt="pretty logo comes here">
+        <nav class="navbar">
+            InsertPrettyHeaderHere
+        </nav>
     </header>
     <main>
         <form method="POST" data-translation-request>
             <textarea name="source_text" id="source_text" cols="50" rows="20"
-                        placeholder="Type here what you want to translate"></textarea>
+                        placeholder="Type here what you want to translate" class="form-control"></textarea>
             <p>
-                <select name="sourceLanguage" id="sourceLanguage" title="Only English is available for this demo">
+                <select name="sourceLanguage" id="sourceLanguage" title="Only English is available for this demo" class="custom-select" readonly>
                     <option value="EN">English</option>
                 </select><span class="red note">(Only english is available for this demo)</span><br>
-                <select name="targetLanguage" id="targetLanguage" title="Only Spanish is available for this demo">
+                <select name="targetLanguage" id="targetLanguage" title="Only Spanish is available for this demo" class="custom-select" readonly>
                     <option value="ES">Spanish</option>
                 </select><span class="red note">(Only spanish is available for this demo)</span>
             </p>
-            <button type="submit">Request translation</button>
+            <button type="submit" class="btn btn-primary">Request translation</button>
         </form>
+
     </main>
 
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
-    <script src="/static/table.js"></script>
-    <script src="/static/translate/text.js"></script>
+    <section class="translated">
 
-    <!-- Needs to be available before the table because the table can be very long -->
-    <template data-translation-line>
-        <tr data-line-id>
-            <td data-uid></td>
-            <td data-source_language></td>
-            <td data-target_language></td>
-            <td data-status></td>
-            <td data-text></td>
-            <td data-translation></td>
-        </tr>
-    </template>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
+        <script src="/static/table.js"></script>
+        <script src="/static/translate/text.js"></script>
 
-    <table>
-        <tr>
-            <th>Translation id</th>
-            <th>From</th>
-            <th>to</th>
-            <th>status</th>
-            <th>text</th>
-            <th>translated</th>
-        </tr>
-        <tbody data-translation-results data-keep-table-sorted="5">
-            {% for translation in user_translations %}
-                <tr data-line-id="{{ translation.uid }}">
-                    <td data-uid >{{ translation.uid }}</td>
-                    <td data-source_language >{{ translation.source_language }}</td>
-                    <td data-target_langauge >{{ translation.target_language }}</td>
-                    <td data-status >{{ translation.status }}</td>
-                    <td data-text >{{ translation.text }}</td>
-                    <td data-translation >{{ translation.translation }}</td>
-                </tr>
-            {% endfor %}
-            <!--<tr>
-                <submission-date></submission-date>
-                <from-language></from-language>
-                <to-language></to-language>
-                <translation-status></translation-status>
-                <original-text></original-text>
-                <translated-text></translated-text>
-            </tr>-->
-        </tbody>
-    </table>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+        <!-- Needs to be available before the table because the table can be very long -->
+        <template data-translation-line>
+            <tr data-line-id>
+                <td data-uid></td>
+                <td data-source_language></td>
+                <td data-target_language></td>
+                <td data-status></td>
+                <td data-text></td>
+                <td data-translation></td>
+            </tr>
+        </template>
+
+        <table class="table">
+            <tr>
+                <th>Translation id</th>
+                <th>From</th>
+                <th>to</th>
+                <th>status</th>
+                <th>text</th>
+                <th>translated</th>
+            </tr>
+            <tbody data-translation-results data-keep-table-sorted="5">
+                {% for translation in user_translations %}
+                    <tr data-line-id="{{ translation.uid }}">
+                        <td data-uid >{{ translation.uid }}</td>
+                        <td data-source_language >{{ translation.source_language }}</td>
+                        <td data-target_langauge >{{ translation.target_language }}</td>
+                        <td data-status >{{ translation.simplified_status }}</td>
+                        <td data-text >{{ translation.text }}</td>
+                        <td data-translation >{{ translation.translation }}</td>
+                    </tr>
+                {% endfor %}
+                <!--<tr>
+                    <submission-date></submission-date>
+                    <from-language></from-language>
+                    <to-language></to-language>
+                    <translation-status></translation-status>
+                    <original-text></original-text>
+                    <translated-text></translated-text>
+                </tr>-->
+            </tbody>
+        </table>
+    </section>
+
 
 </body>
 </html>
