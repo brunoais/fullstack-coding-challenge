@@ -71,7 +71,7 @@ def announce_translation_update(translation: Translation):
                       'translation': translation.translation,
                       'sourceLanguage': translation.source_language,
                       'targetLanguage': translation.target_language,
-                      'status': translation.status,
+                      'status': translation.simplified_status,
                   },
                   include_self=True)
 

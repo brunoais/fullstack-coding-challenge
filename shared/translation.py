@@ -12,6 +12,16 @@ class TranslationStatus(StrEnum):
     accepted = enum.auto()
     rejected = enum.auto()
 
+status_to_simplified_status = {
+    TranslationStatus.new: 'requested',
+    TranslationStatus.translating: 'pending',
+    TranslationStatus.failed: 'pending',
+    TranslationStatus.accepted: 'pending',
+    TranslationStatus.rejected: 'pending',
+    TranslationStatus.canceled: 'requested',
+    TranslationStatus.completed: 'translated',
+}
+
 
 # This is now just a copy of
 class Translation(object):
@@ -30,6 +40,7 @@ class Translation(object):
         self.source_language = source_language
         self.target_language = target_language
         self.status = status
+        self.simplified_status = status_to_simplified_status[status]
 
     def __repr__(self):
         return "%s %s %s_%s" % (
