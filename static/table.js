@@ -34,6 +34,8 @@ window.table = {
 			lineInsertObserver.takeRecords(); // Do not take into account the element that had just been appended
 		};
 
+		window.table.sortTable(tbody, sortCol);
+
 		var lineInsertObserver = new MutationObserver(insertViewport);
 		lineInsertObserver.observe(tbody,{
 			childList: true,
@@ -77,6 +79,12 @@ window.table = {
 
 	Array.from(document.querySelectorAll('tbody[data-keep-table-sorted]')).forEach((tbody) => {
 		registerKeepTableSorted(tbody, tbody.getAttribute('data-keep-table-sorted'))
+	})
+
+	document.addEventListener('DOMContentLoaded', function(e){
+		Array.from(document.querySelectorAll('tbody[data-keep-table-sorted]')).forEach((tbody) => {
+			registerKeepTableSorted(tbody, tbody.getAttribute('data-keep-table-sorted'))
+		})
 	})
 
 })();
