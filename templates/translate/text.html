@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Translation</title>
+    <link rel="stylesheet" href="/static/translate/text.css">
 </head>
 <body>
-
+    <header>
+        InsertPrettyHeaderHere
+    </header>
     <main>
         <form method="POST" data-translation-request>
             <textarea name="source_text" id="source_text" cols="50" rows="20"
@@ -23,6 +26,7 @@
     </main>
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
+    <script src="/static/table.js"></script>
     <script src="/static/translate/text.js"></script>
 
     <!-- Needs to be available before the table because the table can be very long -->
@@ -30,7 +34,7 @@
         <tr data-line-id>
             <td data-uid></td>
             <td data-source_language></td>
-            <td data-target_langauge></td>
+            <td data-target_language></td>
             <td data-status></td>
             <td data-text></td>
             <td data-translation></td>
@@ -39,14 +43,14 @@
 
     <table>
         <tr>
-            <th>Submitted at</th>
+            <th>Translation id</th>
             <th>From</th>
             <th>to</th>
             <th>status</th>
             <th>text</th>
             <th>translated</th>
         </tr>
-        <tbody data-translation-results>
+        <tbody data-translation-results data-keep-table-sorted="5">
             {% for translation in user_translations %}
                 <tr data-line-id="{{ translation.uid }}">
                     <td data-uid >{{ translation.uid }}</td>

@@ -21,7 +21,7 @@ socket.on('translation update', function(msg) {
 	tableLine.setAttribute('data-line-id', msg.uid)
 	tableLine.querySelector('[data-uid]').textContent = msg.uid
 	tableLine.querySelector('[data-source_language]').textContent = msg.sourceLanguage
-	tableLine.querySelector('[data-target_langauge]').textContent = msg.targetLanguage
+	tableLine.querySelector('[data-target_language]').textContent = msg.targetLanguage
 	tableLine.querySelector('[data-status]').textContent = msg.status
 	tableLine.querySelector('[data-text]').textContent = msg.text
 	tableLine.querySelector('[data-translation]').textContent = msg.translation

@@ -57,7 +57,7 @@ def connect():
 def translate_this(message):
     translation_status = translation.request_translation(
         message['text'],
-        message.target_language, message.source_language,
+        message['targetLanguage'], message['sourceLanguage'],
         user_id=request.sid
     )
     announce_translation_update(translation_status)
