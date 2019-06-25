@@ -1,3 +1,4 @@
+import logging
 import threading
 import time
 
@@ -10,9 +11,12 @@ from shared.translation import TranslationStatus, Translation
 from translate import unbabel
 
 
+LOG = logging.getLogger(config.LOG_BASE_NAME + '.' + __name__)
 
 
 def request_translation(text, target_language, source_language=None, user_id=None):
+    LOG.info("Trying to create translation for %s", text)
+
     target_language = target_language.lower()
     source_language = source_language and source_language.lower()
 
@@ -24,7 +28,11 @@ def request_translation(text, target_language, source_language=None, user_id=Non
 
     with db.connection() as conn:
 
+        LOG.info("requesting unbabel for %s", text)
+
         translation = unbabel.new_translation(text, target_language, source_language)
+
+        LOG.info("storing unbabel translation in DB. Tr is: %s", translation)
 
         executed = conn.execute("""
             INSERT INTO comms.translations(
@@ -41,6 +49,8 @@ def request_translation(text, target_language, source_language=None, user_id=Non
                 source_language, target_language,
                 text
             ))
+
+        LOG.info("Translation successfully created: %s", translation)
 
         return translation
 
@@ -74,38 +84,50 @@ def update_translations():
         # source: https://stackoverflow.com/a/12707465/551625
         column_names = {column[0]: index for index, column in enumerate(translations_waiting.description)}
 
-        for translation_waiting in translations_waiting:
-            previous_status = TranslationStatus[translation_waiting[column_names['status']]]
-            translation_data = unbabel.translation_status(
-                uid=translation_waiting[column_names['unbabel_translation_id']])
+        translations_count = 0
+        updated_count = 0
+        try:
+            for translation_waiting in translations_waiting:
+                previous_status = TranslationStatus[translation_waiting[column_names['status']]]
+                translation_data = unbabel.translation_status(
+                    uid=translation_waiting[column_names['unbabel_translation_id']])
 
-            if translation_data.status != previous_status:
-                # Status updated. Broadcast the update
-                broadcast_translation_update(translation_data)
+                translations_count += 1
+                if translation_data.status != previous_status:
+                    updated_count += 1
+                    # Status updated. Broadcast the update
+                    broadcast_translation_update(translation_data)
 
-                conn.execute(
-                    """
-                        UPDATE comms.translations
-                        SET 
-                            response_time = now(),
-                            status = ?,
-                            response_text = ?
-                        WHERE 
-                            translation_req_id = ?
-                    """,
-                    (
-                        translation_data.status.name,
-                        translation_data.translation,
-                        translation_waiting[column_names['translation_req_id']],
+                    conn.execute(
+                        """
+                            UPDATE comms.translations
+                            SET 
+                                response_time = now(),
+                                status = ?,
+                                response_text = ?
+                            WHERE 
+                                translation_req_id = ?
+                        """,
+                        (
+                            translation_data.status.name,
+                            translation_data.translation,
+                            translation_waiting[column_names['translation_req_id']],
+                        )
                     )
-                )
+        finally:
+            LOG.info("updating translations: out of %d translations needing update, %d were updated", translations_count, updated_count)
+
 
 
 def periodic_update_translations():
 
     while True:
-        update_translations()
-        time.sleep(2)
+        LOG.info("updating the translations in the system")
+        try:
+            update_translations()
+        except Exception:
+            LOG.exception("Failed to update the translations due to an exception")
+        time.sleep(config.UPDATE_TRANSLATIONS_POLL_INTERVAL_SECS)
 
 
 periodic_updating_thread = threading.Thread(target=periodic_update_translations, name="update_translation_status")
@@ -134,8 +156,10 @@ def user_translations_stream():
         # source: https://stackoverflow.com/a/12707465/551625
         column_names = {column[0]: index for index, column in enumerate(user_translations.description)}
 
+        LOG.info("Listing the translations in the system")
+
         for user_translation in user_translations:
-            yield Translation(
+            tr = Translation(
                 user_translation[column_names['unbabel_translation_id']],
                 user_translation[column_names['request_text']],
                 user_translation[column_names['response_text']],
@@ -143,5 +167,7 @@ def user_translations_stream():
                 user_translation[column_names['source_language']],
                 user_translation[column_names['status']]
             )
+            LOG.debug("Translation: %s", tr)
+            yield tr
             # time.sleep(1)
 

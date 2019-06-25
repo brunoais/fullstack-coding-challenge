@@ -195,8 +195,8 @@ def setup_events_comms(app: Flask):
     global socketio
     from flask_socketio import SocketIO
 
-    socketio = SocketIO(app, engineio_logger=True, async_mode='threading')
-    # socketio = SocketIO(app, engineio_logger=True, async_mode='gevent')
+    # socketio = SocketIO(app, engineio_logger=True, async_mode='threading')
+    socketio = SocketIO(app, engineio_logger=True, async_mode='eventlet')
     # socketio = SocketIO(app, engineio_logger=True)
 
 

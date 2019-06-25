@@ -16,6 +16,9 @@ UNBABEL_API_KEY = os.environ['UNBABEL_API_KEY']
 VALID_SOURCE_LANGUAGES = set(('en',))  # Can be evolved to make use of environ variables
 VALID_TARGET_LANGUAGES = set(('es',))
 
+UPDATE_TRANSLATIONS_POLL_INTERVAL_SECS = float(os.environ.get('UPDATE_TRANSLATIONS_POLL_INTERVAL_SECS', '5'))
+
+
 OBDC_SERVER_NAME = os.environ.get('OBDC_SERVER_NAME', 'localhost')
 
 ODBC_CONN_STR = (

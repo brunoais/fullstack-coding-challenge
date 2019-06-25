@@ -1,3 +1,4 @@
+import logging
 import threading
 
 import pyodbc as pyodbc
@@ -15,6 +16,7 @@ from translate.translation import add_translation_callback
 blueprint = Blueprint('translate', __name__, url_prefix="/translate")
 http_server.register_blueprint(blueprint)
 
+LOG = logging.getLogger(config.LOG_BASE_NAME + '.' + __name__)
 
 def stream_template(template_name, **context):
     # From http://flask.pocoo.org/docs/1.0/patterns/streaming/#streaming-from-templates
@@ -30,6 +32,7 @@ def stream_template(template_name, **context):
 @blueprint.route('/text')
 def index():
     user_translations = translation.user_translations_stream()
+    LOG.info("opening translations page")
     return Response(
         stream_with_context(
             stream_template('translate/text.html', user_translations=user_translations)
@@ -40,6 +43,8 @@ def index():
 
 @blueprint.route('/text', methods=['POST'])
 def submit_translation():
+    LOG.info("translation submission (POST), %s -> %s of: %s",
+             request.form['sourceLanguage'], request.form['targetLanguage'], request.form['source_text'])
     translation.request_translation(request.form['source_text'],
                                     request.form['targetLanguage'],
                                     request.form['sourceLanguage'],
@@ -51,10 +56,12 @@ event_route = blueprint.url_prefix + "/text"
 @socketio.on("connect")
 def connect():
     print("connected")
+    LOG.info("New client connected")
 
 
 @socketio.on('translate this')
 def translate_this(message):
+    LOG.info("translation submission (POST), %s -> %s of: %s", message['sourceLanguage'], message['targetLanguage'], message['text'])
     translation_status = translation.request_translation(
         message['text'],
         message['targetLanguage'], message['sourceLanguage'],
@@ -64,6 +71,8 @@ def translate_this(message):
 
 
 def announce_translation_update(translation: Translation):
+    LOG.info("Announcing a translation update: %s", translation)
+
     socketio.emit('translation update',
                   {
                       'uid': translation.uid,
