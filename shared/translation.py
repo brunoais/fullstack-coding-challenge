@@ -40,12 +40,12 @@ class Translation(object):
         self.source_language = source_language
         self.target_language = target_language
         self.status = status
-        self.simplified_status = status_to_simplified_status[status]
+        self.simplified_status = status and status_to_simplified_status[status]
 
     def __repr__(self):
-        return "%s %s %s_%s" % (
+        return "%s %s %s->%s" % (
             self.uid, self.status, self.source_language, self.target_language)
 
     def __str__(self):
-        return "%s %s %s_%s" % (
+        return "%s %s %s->%s" % (
             self.uid, self.status, self.source_language, self.target_language)

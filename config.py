@@ -16,15 +16,18 @@ UNBABEL_API_KEY = os.environ['UNBABEL_API_KEY']
 VALID_SOURCE_LANGUAGES = set(('en',))  # Can be evolved to make use of environ variables
 VALID_TARGET_LANGUAGES = set(('es',))
 
+OBDC_SERVER_NAME = os.environ.get('OBDC_SERVER_NAME', 'localhost')
+
 ODBC_CONN_STR = (
     "DRIVER={PostgreSQL Unicode};"
     "DATABASE=user;"
     "UID=user;"
     "PWD=testingpassword;"
-    "SERVER=localhost;"
+    "SERVER=" + OBDC_SERVER_NAME + ";"
     "PORT=5432;"
 )
 
+UNIT_TESTS = False
 
 
 LOG_FORMAT = os.environ.get('LOG_FORMAT', "%(asctime)-15s @%(threadName)s [%(levelname)-5.5s] %(funcName)s() (%(request_id)s) %(message)s")

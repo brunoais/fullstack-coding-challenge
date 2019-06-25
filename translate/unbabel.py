@@ -1,4 +1,4 @@
-from unbabel.api import UnbabelApi
+from shared.unbabel.api import UnbabelApi
 
 import config
 from shared.translation import Translation, TranslationStatus
@@ -53,7 +53,7 @@ class UnbabelTranslation(Translation):
             translatedText,
             target_language,
             source_language,
-            TranslationStatus[status_text],)
+            status_text and TranslationStatus[status_text],)
         self.unbabel_status = status_text
         self.translators = translators
         self.topics = topics

@@ -1,0 +1,54 @@
+
+version: "3.5"
+
+services:
+  code-challenge:
+    build:
+      context: .
+      target: default
+    depends_on:
+      - "database"
+    environment:
+      - UNBABEL_USERNAME=${UNBABEL_USERNAME:-fullstack-challenge}
+      - UNBABEL_API_KEY=${UNBABEL_API_KEY}
+      - OBDC_SERVER_NAME=database
+    entrypoint: ['python', 'docker_boot.py']
+    ports:
+      - ${SERVER_OUTSIDE_PORT:-8080}:8000
+
+  databaseGui0:
+    image: dockage/phppgadmin
+    depends_on:
+      - "database"
+    environment:
+      - PHP_PG_ADMIN_MIN_PASSWORD_LENGTH=0
+      - PHP_PG_ADMIN_SERVER_HOST=database
+      - PHP_PG_ADMIN_SERVER_SSL_MODE=disable
+      - PHP_PG_ADMIN_SERVER_DEFAULT_DB=unbabel
+    ports:
+      - ${GUI0_OUTSIDE_PORT:-7000}:80
+      
+  databaseGui1:
+    image: dpage/pgadmin4
+    depends_on:
+      - "database"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-brunoais@localhost}
+      - PGADMIN_DEFAULT_PASSWORD=${PG_DEFAULT_PASSWORD:-testingpassword}
+      - PGADMIN_LISTEN_PORT=7001
+    volumes:
+      - ./containers/pgadmin:/var/lib/pgadmin
+    ports:
+      - ${GUI1_OUTSIDE_PORT:-7001}:7001
+
+  database:
+    image: postgres
+    shm_size: 256MB
+    environment:
+      - POSTGRES_USER=${PG_DEFAULT_USER:-user}
+      - POSTGRES_PASSWORD=${PG_DEFAULT_PASSWORD:-testingpassword}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ${PG_STORE_DATA_LOCATION:-./containers/postgresql/pgdata}:/var/lib/postgresql/data/pgdata
+    ports:
+      - ${PG_OUTSIDE_PORT:-5432}:5432

@@ -37,3 +37,11 @@ You can find more info about the api at [https://developers.unbabel.com](https:/
 #### Resources
 * Unbabel's API: http://developers.unbabel.com/
 
+
+#### Booting this example
+This example requires UNBABEL_API_KEY to be defined as an environment variable.
+If you are using bash, you may just launch this server using:
+
+`UNBABEL_API_KEY=some-key-you-have docker-compose -f server-compose.yaml up`
+
+You may also specify `UNBABEL_USERNAME` if you are not using the default "fullstack-challenge"

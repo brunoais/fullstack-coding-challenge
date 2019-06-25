@@ -102,7 +102,7 @@ def setup_global_error_handlers(app: Flask):
     @app.errorhandler(shared.exceptions.InvalidLanguage)
     def invalid_submit_data(e):
         LOG.warning('User sent a language that is invalid', e, exc_info=e)
-        return shared.exceptions.call_error("The {type} language is not allwowed".format(e.TYPE), 422, "REFUSED INPUT")
+        return shared.exceptions.call_error("The {type} language is not allowed".format(type=e.TYPE), 422, "REFUSED INPUT")
 
 
     @app.errorhandler(shared.exceptions.InvalidSubmit)

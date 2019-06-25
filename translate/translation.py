@@ -55,56 +55,63 @@ def broadcast_translation_update(translation):
         callback(translation)
 
 
-def periodic_translations_update():
+def update_translations():
+    """
+        This function exists mostly so this feature can be tested
+    """
+    # Because the status updating is idempotent, this can commit only at the end with no problem if there's repetitions later
+    # Regardless, it can need someone monitoring at the error logs to make sure errors are not causing cyclical problems
 
+    with db.connection() as conn:
+        translations_waiting: Cursor = conn.execute(
+            """
+                SELECT translation_req_id, unbabel_translation_id, user_id, status
+                FROM comms.translations
+                WHERE status in ('new', 'translating', 'accepted')
+            """
+        )
+
+        # source: https://stackoverflow.com/a/12707465/551625
+        column_names = {column[0]: index for index, column in enumerate(translations_waiting.description)}
+
+        for translation_waiting in translations_waiting:
+            previous_status = TranslationStatus[translation_waiting[column_names['status']]]
+            translation_data = unbabel.translation_status(
+                uid=translation_waiting[column_names['unbabel_translation_id']])
+
+            if translation_data.status != previous_status:
+                # Status updated. Broadcast the update
+                broadcast_translation_update(translation_data)
+
+                conn.execute(
+                    """
+                        UPDATE comms.translations
+                        SET 
+                            response_time = now(),
+                            status = ?,
+                            response_text = ?
+                        WHERE 
+                            translation_req_id = ?
+                    """,
+                    (
+                        translation_data.status.name,
+                        translation_data.translation,
+                        translation_waiting[column_names['translation_req_id']],
+                    )
+                )
+
+
+def periodic_update_translations():
 
     while True:
-        # Because the status updating is idempotent, this can commit only at the end with no problem if there's repetitions later
-        # Regardless, it can need someone monitoring at the error logs to make sure errors are not causing cyclical problems
-
-        with db.connection() as conn:
-            translations_waiting: Cursor = conn.execute(
-                """
-                    SELECT translation_req_id, unbabel_translation_id, user_id, status
-                    FROM comms.translations
-                    WHERE status in ('new', 'translating', 'accepted')
-                """
-            )
-
-            # source: https://stackoverflow.com/a/12707465/551625
-            column_names = {column[0]: index for index, column in enumerate(translations_waiting.description)}
-
-            for translation_waiting in translations_waiting:
-                previous_status = TranslationStatus[translation_waiting[column_names['status']]]
-                translation_data = unbabel.translation_status(uid=translation_waiting[column_names['unbabel_translation_id']])
-
-                if translation_data.status != previous_status:
-                    # Status updated. Broadcast the update
-                    broadcast_translation_update(translation_data)
-
-                    conn.execute(
-                        """
-                            UPDATE comms.translations
-                            SET 
-                                response_time = now(),
-                                status = ?,
-                                response_text = ?
-                            WHERE 
-                                translation_req_id = ?
-                        """,
-                        (
-                            translation_data.status.name,
-                            translation_data.translation,
-                            translation_waiting[column_names['translation_req_id']]
-                        )
-                    )
-
+        update_translations()
         time.sleep(2)
 
 
-periodic_updating_thread = threading.Thread(target=periodic_translations_update, name="update_translation_status")
+periodic_updating_thread = threading.Thread(target=periodic_update_translations, name="update_translation_status")
 periodic_updating_thread.daemon = True
-periodic_updating_thread.start()
+if not config.UNIT_TESTS:
+    periodic_updating_thread.start()
 
 
 def user_translations_stream():

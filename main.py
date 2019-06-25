@@ -2,12 +2,11 @@ import pkgutil
 import importlib
 
 # load all startup packages
-from flask_babel import Babel
+# from flask_babel import Babel
 
 for _, package_name, _ in pkgutil.iter_modules(["startup"], prefix='startup.'):
     importlib.import_module(package_name)
 
-import startup.babel
 import startup.http_server
 
 import config
@@ -16,9 +15,8 @@ from shared import boot_queue
 from startup.http_server import flask
 
 app = flask.Flask(__name__)
-babel = Babel(app)
+# babel = Babel(app)
 
-startup.babel.babel(babel)
 
 startup.http_server.setup_server(app)
 startup.http_server.setup_global_error_handlers(app)

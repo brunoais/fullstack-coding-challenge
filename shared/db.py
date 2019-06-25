@@ -4,7 +4,7 @@ import pyodbc
 import config
 
 
-def connection():
+def connection() -> pyodbc.Connection:
     # Connection reuse is on in the ini file. This is safe to do as many times as needed
     cnxn: pyodbc.Connection = pyodbc.connect(config.ODBC_CONN_STR, autocommit=False)
 

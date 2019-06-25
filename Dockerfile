@@ -1,19 +1,11 @@
-FROM 3.7.3-stretch AS Build
-LABEL python_version=python3.7
-
-RUN virtualenv --no-download /env -p python3.6
-
-ARG PORT=8080
-
-# Set virtualenv environment variables. This is equivalent to running
-# source /env/bin/activate
-ENV VIRTUAL_ENV /env
-ENV PATH /env/bin:$PATH
+FROM python:3.7.3-stretch AS Build
 
 RUN mkdir challenge 
 WORKDIR /challenge
 
-apt-get install odbc-postgresql
+
+RUN apt-get update && \
+	apt-get install -y unixodbc-dev g++ odbc-postgresql
 
 ADD . .
 RUN pip install -r requirements.txt
