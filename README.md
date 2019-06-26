@@ -49,3 +49,9 @@ You may also start the server with gunicorn by running `start.sh`
 
 You may also specify `UNBABEL_USERNAME` environment variable if you are not using the default one ("fullstack-challenge").
 
+#### Known issues
+
+* Page does not update automatically when a translation changes state.
+
+A library in use (SocketIO) requires knowing how the server is running. I created the environment variable "SERVER_TYPE" (values either "threading" or "eventlet" (no quotes)) which allows you to select the mode which it will use. Supposedly "eventlet" works if running using "eventlet" but, sometimes, when using docker, the connections appear to be dropping (or even connection resets) outside user view.  
+If the **web page does not update dynamically** when running in docker, try running without docker. If that doesn't work either, then try running without gunicorn and run the python program directly. It will use werzeug's dev server and should automatically set itself to "threading" mode.
