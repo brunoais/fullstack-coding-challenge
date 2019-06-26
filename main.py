@@ -22,7 +22,11 @@ startup.http_server.setup_server(app)
 startup.http_server.setup_global_error_handlers(app)
 startup.http_server.setup_app_jinja(app)
 startup.http_server.setup_global_routes(app)
-startup.http_server.setup_events_comms(app)
+
+if __name__ == '__main__':
+    startup.http_server.setup_events_comms(app, 'threading')
+else:
+    startup.http_server.setup_events_comms(app)
 
 from translate import http
 

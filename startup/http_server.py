@@ -191,13 +191,16 @@ def setup_global_routes(app: Flask):
     def index():
         return redirect(url_for('translate.index'), code=303)
 
-def setup_events_comms(app: Flask):
+def setup_events_comms(app: Flask, force_server_type=None):
     global socketio
     from flask_socketio import SocketIO
 
-    # socketio = SocketIO(app, engineio_logger=True, async_mode='threading')
-    socketio = SocketIO(app, engineio_logger=True, async_mode='eventlet')
-    # socketio = SocketIO(app, engineio_logger=True)
+    if force_server_type:
+        socketio = SocketIO(app, engineio_logger=True, async_mode=force_server_type)
+    elif config.SERVER_TYPE:
+        socketio = SocketIO(app, engineio_logger=True, async_mode=config.SERVER_TYPE)
+    else:
+        socketio = SocketIO(app, engineio_logger=True)
 
 
 

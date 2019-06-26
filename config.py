@@ -18,6 +18,8 @@ VALID_TARGET_LANGUAGES = set(('es',))
 
 UPDATE_TRANSLATIONS_POLL_INTERVAL_SECS = float(os.environ.get('UPDATE_TRANSLATIONS_POLL_INTERVAL_SECS', '5'))
 
+SERVER_TYPE = os.environ.get('SERVER_TYPE') # MUST be 'threading' or 'eventlet'
+
 
 OBDC_SERVER_NAME = os.environ.get('OBDC_SERVER_NAME', 'localhost')
 
@@ -105,3 +107,7 @@ class LoginMessages(StrEnum):
     INVALID_TOKEN = enum.auto()
     SESSION_TIMEOUT = enum.auto()
 
+
+if SERVER_TYPE and SERVER_TYPE not in ('threading', 'eventlet'):
+    LOG.fatal("SERVER_TYPE ENV var must be one of ('threading', 'eventlet'). '%s' was given instead", SERVER_TYPE)
+    sys.exit(5)

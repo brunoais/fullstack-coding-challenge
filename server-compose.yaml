@@ -12,6 +12,7 @@ services:
       - UNBABEL_USERNAME=${UNBABEL_USERNAME:-fullstack-challenge}
       - UNBABEL_API_KEY=${UNBABEL_API_KEY}
       - OBDC_SERVER_NAME=database
+      - SERVER_TYPE=eventlet
     entrypoint: ['python', 'docker_boot.py']
     ports:
       - ${SERVER_OUTSIDE_PORT:-8080}:8000
